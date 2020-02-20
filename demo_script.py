@@ -20,8 +20,9 @@ dictionary = {'closed' : dataset_simulation_sliding_lid[0],
               'almost_open' : dataset_simulation_sliding_lid[2], 
               'open' : dataset_simulation_sliding_lid[3]}
 Fs = Fs_array[1]
-data_simulation_sliding_lid = pd.DataFrame(data = dictionary, index = pd.timedelta_range(start=pd.Timedelta(days=0), freq=str(round(1000/Fs, 5)) + 'ms', 
-                                   periods=len(dataset_simulation_sliding_lid[0])))
+data_simulation_sliding_lid = pd.DataFrame(data = dictionary, index = pd.timedelta_range(start=pd.Timedelta(days=0), 
+                                                                                         freq=str(round(1000/Fs, 5)) + 'ms', 
+                                                                                         periods=len(dataset_simulation_sliding_lid[0])))
 data_simulation_sliding_lid.head()
 
 ############################## DATA LOADED ##############################
@@ -32,15 +33,19 @@ ws_sorted_density = int(0.2*Fs)   # 200ms
 milliseconds_to_remove = 10 # for the remove the direct path function
 signal_length = 1
 
-gaussian_sd = gaussian_sorted_density(ws_detrending, Fs)
+gaussian_sd = gaussian_sorted_density(ws_detrending)
 print('Sorted density for Gaussian signal: ', gaussian_sd)
 
 signal = data_simulation_sliding_lid['closed'].to_numpy()
 t = np.array(range(len(signal)))/Fs
 signal = remove_direct_sound(signal, Fs, signal_length)
 
-detrended_signal = generalized_detrending(signal, ws_detrending, Fs)                            # MovingCustomFeature #1
-echo_density = sorted_density_feature(detrended_signal, ws_sorted_density, Fs)                  # MovingCustomFeature #2
+#custom_feature = CrestFactorDetrending(window_size=2, is_causal = True) # causal
+#custom_output = custom_feature.fit_transform(self.df)
+detrended_signal = generalized_detrending(signal, ws_detrending)                            # MovingCustomFeature #1
+# custom_feature = SortedDensity(window_size=2, is_causal = True) # causal
+# custom_output = custom_feature.fit_transform(self.df)
+echo_density = sorted_density_feature(detrended_signal, ws_sorted_density)                  # MovingCustomFeature #2
 
 echo_density = echo_density/gaussian_sd
 n = curve_fitting_echo_density(echo_density, Fs)
