@@ -5,7 +5,7 @@ import h5py
 from SortedDensity import SortedDensity
 from CrestFactorDetrending import CrestFactorDetrending
 
-from acoustics2 import generalized_detrending, sorted_density, sorted_density_feature, gaussian_sorted_density
+from acoustics import generalized_detrending, sorted_density, sorted_density_feature, gaussian_sorted_density
 from acoustics_helpers import remove_direct_sound, curve_fitting_echo_density
 
 # 3 demos available
