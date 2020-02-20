@@ -1,12 +1,6 @@
-import pandas as pd
-from sklearn.base import BaseEstimator, TransformerMixin
-from sklearn.utils.validation import check_is_fitted
+from gtime.feature_extraction import MovingCustomFunction
 
-from giottotimemaster.gtime.base import FeatureMixin, add_class_name
-# will become part of the feature extraction module of giotto-time:
-# https://github.com/giotto-ai/giotto-time/blob/master/gtime/feature_extraction/standard.py
-
-class SortedDensity(BaseEstimator, TransformerMixin, FeatureMixin):
+class SortedDensity(MovingCustomFunction):
     """For each row in ``time_series``, compute the sorted density function of the
     previous ``window_size`` rows. If there are not enough rows, the value is ``Nan``.
     Sorted density measured is defined in (eq. 1) of: H. P. Tukuljac, V. Pulkki,
@@ -17,7 +11,9 @@ class SortedDensity(BaseEstimator, TransformerMixin, FeatureMixin):
     Parameters
     ----------
     window_size : int, optional, default: ``1``
-        The number of previous points on which to compute the sorted density.
+        The number of previous points on which to compute the sorted density.    
+    is_causal : bool, optional, default: ``True``
+        Whether the current sample is computed based only on the past or also on the future.
     Examples
     --------
     >>> import pandas as pd
@@ -33,52 +29,17 @@ class SortedDensity(BaseEstimator, TransformerMixin, FeatureMixin):
     4                 0.714286
     5                 0.722222
     --------
-    """
-    def __init__(self, window_size: int = 1):
-        super().__init__()
+    """    
+    def __init__(self, window_size: int = 1, is_causal: bool = True):        
+        super().__init__(self.sorted_density)
         self.window_size = window_size
-
-    def fit(self, X, y=None):
-        """Fit the estimator.
-        Parameters
-        ----------
-        X : pd.DataFrame, shape (n_samples, n_features)
-            Input data.
-        y : None
-            There is no need of a target in a transformer, yet the pipeline API
-            requires this parameter.
-        Returns
-        -------
-        self : object
-            Returns self.
-        """
-        self.columns_ = X.columns.values
-        return self
-
-    @add_class_name
-    def transform(self, time_series: pd.DataFrame) -> pd.DataFrame:
-        """Compute the sorted density, for every row of ``time_series``, of the previous
-        ``window_size`` elements.
-        Parameters
-        ----------
-        time_series : pd.DataFrame, shape (n_samples, 1), required
-            The DataFrame on which to compute the rolling moving average
-        Returns
-        -------
-        time_series_t : pd.DataFrame, shape (n_samples, 1)
-            A DataFrame, with the same length as ``time_series``, containing the rolling
-            sorted density for each observed time window.
-        """
-        check_is_fitted(self)
-        def sorted_density(signal, Fs = 1):
-            import numpy as np
-            t = (np.array(range(len(signal))) + 1)/Fs
-            signal = np.array(signal)
-            signal = signal[signal.argsort()[::-1]]
-            t = np.reshape(t, signal.shape)
-            SD = np.sum(np.multiply(t, signal))/np.sum(signal) # (eq. 2)
-            SD = SD/(len(signal)/Fs)
-            return SD
+        self.is_causal = is_causal
         
-        time_series_srt_dns = time_series.rolling(self.window_size).apply(sorted_density, raw=False)
-        return time_series_srt_dns
+    def sorted_density(self, signal):
+        import numpy as np
+        t = (np.array(range(len(signal))) + 1)
+        signal = signal[signal.argsort()[::-1]]
+        t = np.reshape(t, signal.shape)
+        SD = np.sum(np.multiply(t, signal))/np.sum(signal) # (eq. 2)
+        SD = SD/(len(signal))
+        return SD
