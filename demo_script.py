@@ -5,7 +5,7 @@ import h5py
 from SortedDensity import SortedDensity
 from CrestFactorDetrending import CrestFactorDetrending
 
-from acoustics import generalized_detrending, sorted_density, sorted_density_feature, gaussian_sorted_density
+from acoustics2 import generalized_detrending, sorted_density, sorted_density_feature, gaussian_sorted_density
 from acoustics_helpers import remove_direct_sound, curve_fitting_echo_density
 
 # 3 demos available
@@ -20,9 +20,9 @@ dictionary = {'closed' : dataset_simulation_sliding_lid[0],
               'almost_open' : dataset_simulation_sliding_lid[2], 
               'open' : dataset_simulation_sliding_lid[3]}
 Fs = Fs_array[1]
-data_simulation_sliding_lid = pd.DataFrame(data = dictionary, index = pd.timedelta_range(start=pd.Timedelta(days=0), 
-                                                                                         freq=str(round(1000/Fs, 5)) + 'ms', 
-                                                                                         periods=len(dataset_simulation_sliding_lid[0])))
+index = pd.timedelta_range(start=pd.Timedelta(days=0), freq=str(round(1000/Fs, 5)) + 'ms',
+                           periods=len(dataset_simulation_sliding_lid[0]))
+data_simulation_sliding_lid = pd.DataFrame(data = dictionary, index = index)
 data_simulation_sliding_lid.head()
 
 ############################## DATA LOADED ##############################
@@ -36,17 +36,20 @@ signal_length = 1
 gaussian_sd = gaussian_sorted_density(ws_detrending)
 print('Sorted density for Gaussian signal: ', gaussian_sd)
 
-signal = data_simulation_sliding_lid['closed'].to_numpy()
+signal = data_simulation_sliding_lid['open'].to_numpy()
 t = np.array(range(len(signal)))/Fs
-signal = remove_direct_sound(signal, Fs, signal_length)
+signal = pd.DataFrame(remove_direct_sound(signal, Fs, signal_length)).to_numpy()
+#signal = remove_direct_sound(signal, Fs, signal_length)
 
-#custom_feature = CrestFactorDetrending(window_size=2, is_causal = True) # causal
-#custom_output = custom_feature.fit_transform(self.df)
+#detrending_feature = CrestFactorDetrending(window_size=ws_detrending, is_causal = True) # causal
+#detrended_signal = detrending_feature.fit_transform(signal)
 detrended_signal = generalized_detrending(signal, ws_detrending)                            # MovingCustomFeature #1
-# custom_feature = SortedDensity(window_size=2, is_causal = True) # causal
-# custom_output = custom_feature.fit_transform(self.df)
+
+#density_feature = SortedDensity(window_size=ws_sorted_density, is_causal = True) # causal
+#echo_density = density_feature.fit_transform(pd.DataFrame(detrended_signal)).to_numpy()
 echo_density = sorted_density_feature(detrended_signal, ws_sorted_density)                  # MovingCustomFeature #2
 
 echo_density = echo_density/gaussian_sd
+echo_density = echo_density[~np.isnan(echo_density)]
 n = curve_fitting_echo_density(echo_density, Fs)
 print(n)

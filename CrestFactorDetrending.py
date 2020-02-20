@@ -45,6 +45,6 @@ class CrestFactorDetrending(MovingCustomFunction):
         if (self.is_causal):
             ref_index = -1
         else:
-            ref_idnex = np.ceil(len(signal)/2) 
-        small_signal_segment = signal[-1]**N
+            ref_index = int(len(signal)/2) 
+        small_signal_segment = signal[ref_index]**N
         return small_signal_segment/large_segment_mean # (eq. 1)

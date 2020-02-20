@@ -62,7 +62,7 @@ def generalized_detrending_causal(signal, window_size = 1):
         
         large_signal_segment = signal[il:ir]**N
         large_segment_mean = np.sum(large_signal_segment)
-        small_signal_segment = signal[ir]**N
+        small_signal_segment = signal[ir - 1]**N
         
         detrended_signal.append(small_signal_segment/large_segment_mean) # (eq. 1)
     return detrended_signal
