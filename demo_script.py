@@ -41,11 +41,11 @@ t = np.array(range(len(signal)))/Fs
 signal = pd.DataFrame(remove_direct_sound(signal, Fs, signal_length)).to_numpy()
 #signal = remove_direct_sound(signal, Fs, signal_length)
 
-#detrending_feature = CrestFactorDetrending(window_size=ws_detrending, is_causal = True) # causal
+#detrending_feature = CrestFactorDetrending(window_size=ws_detrending, is_causal = True)
 #detrended_signal = detrending_feature.fit_transform(signal)
 detrended_signal = generalized_detrending(signal, ws_detrending)                            # MovingCustomFeature #1
 
-#density_feature = SortedDensity(window_size=ws_sorted_density, is_causal = True) # causal
+#density_feature = SortedDensity(window_size=ws_sorted_density, is_causal = True)
 #echo_density = density_feature.fit_transform(pd.DataFrame(detrended_signal)).to_numpy()
 echo_density = sorted_density_feature(detrended_signal, ws_sorted_density)                  # MovingCustomFeature #2
 
