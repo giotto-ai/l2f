@@ -94,4 +94,4 @@ def curve_fitting_echo_density(data_points_in, Fs):
     
     t_mix = mixing_time(loga, n, e_inf)
     a = np.exp(loga)
-    return n
+    return n, echo_density_function(np.log(t), loga, n, e_inf)
