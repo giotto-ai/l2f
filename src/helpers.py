@@ -89,6 +89,7 @@ def curve_fitting_echo_density(data_points_in, Fs):
     t_bias = 0.02
     xdata = np.log(t_bias + t)
     ydata = np.log(data_points)
+    ydata = np.reshape(ydata, xdata.shape)
     p0 = np.array([1, 2, 0.9])
     [loga, n, e_inf], pcov = curve_fit(echo_density_function, xdata, ydata, bounds=([-1e10, 0, 0], [1e10, 5, 2]), p0 = p0)
     t_mix = mixing_time(loga, n, e_inf)
