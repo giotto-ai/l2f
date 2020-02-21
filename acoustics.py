@@ -68,7 +68,6 @@ def generalized_detrending_causal(signal, window_size = 1):
     return detrended_signal
 
 #############################################################################################
-
 def sorted_density_feature(signal, window_size = 1):
     """Sliding window definition of sorted density. Signal is first sorted and then weighted mean
     is computed having as weights the position of samples in the ordered array.

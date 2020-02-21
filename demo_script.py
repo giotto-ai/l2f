@@ -39,17 +39,20 @@ print('Sorted density for Gaussian signal: ', gaussian_sd)
 signal = data_simulation_sliding_lid['open'].to_numpy()
 t = np.array(range(len(signal)))/Fs
 signal = pd.DataFrame(remove_direct_sound(signal, Fs, signal_length)).to_numpy()
-#signal = remove_direct_sound(signal, Fs, signal_length)
 
 #detrending_feature = CrestFactorDetrending(window_size=ws_detrending, is_causal = True)
 #detrended_signal = detrending_feature.fit_transform(signal)
 detrended_signal = generalized_detrending(signal, ws_detrending)                            # MovingCustomFeature #1
 
-#density_feature = SortedDensity(window_size=ws_sorted_density, is_causal = True)
-#echo_density = density_feature.fit_transform(pd.DataFrame(detrended_signal)).to_numpy()
+density_feature = SortedDensity(window_size=ws_sorted_density, is_causal = True)
+echo_density = density_feature.fit_transform(pd.DataFrame(detrended_signal)).to_numpy()
+print(echo_density.shape)
+print(echo_density[0:10])
 echo_density = sorted_density_feature(detrended_signal, ws_sorted_density)                  # MovingCustomFeature #2
+print(len(echo_density))
+print(echo_density[0:10])
 
 echo_density = echo_density/gaussian_sd
 echo_density = echo_density[~np.isnan(echo_density)]
-n = curve_fitting_echo_density(echo_density, Fs)
-print(n)
+n, curve = curve_fitting_echo_density(echo_density, Fs)
+print('Esitmated parameter n: ', n)
