@@ -1,3 +1,5 @@
+import pandas as pd
+from sklearn.utils.validation import check_is_fitted
 from gtime.feature_extraction import MovingCustomFunction
 
 class CrestFactorDetrending(MovingCustomFunction):
@@ -31,7 +33,7 @@ class CrestFactorDetrending(MovingCustomFunction):
     --------
     """
 
-    def __init__(self, window_size: int = 1, is_causal: bool = False):
+    def __init__(self, window_size: int = 1, is_causal: bool = True):
         super().__init__(self.detrend)
         self.window_size = window_size
         self.is_causal = is_causal
@@ -48,3 +50,31 @@ class CrestFactorDetrending(MovingCustomFunction):
             ref_index = int(len(signal)/2) 
         small_signal_segment = signal[ref_index]**N
         return small_signal_segment/large_segment_mean # (eq. 1)
+        
+    def transform(self, time_series: pd.DataFrame) -> pd.DataFrame:
+        """For every row of ``time_series``, compute the moving crest factor detrending function of the
+         previous ``window_size`` elements.
+        Parameters
+        ----------
+        time_series : pd.DataFrame, shape (n_samples, 1), required
+            The DataFrame on which to compute the rolling moving custom function.
+        Returns
+        -------
+        time_series_t : pd.DataFrame, shape (n_samples, 1)
+            A DataFrame, with the same length as ``time_series``, containing the rolling
+            moving custom function for each element.
+        """
+        check_is_fitted(self)
+
+        if(self.is_causal):
+            time_series_mvg_dtr = time_series.rolling(self.window_size).apply(
+                self.detrend, raw=self.raw
+            )
+        else:
+            time_series_mvg_dtr = time_series.rolling(self.window_size, min_periods = int(self.window_size/2)).apply(
+                self.detrend, raw=self.raw
+            )
+            time_series_mvg_dtr = time_series_mvg_dtr.dropna()
+            
+        time_series_t = time_series_mvg_dtr
+        return time_series_t

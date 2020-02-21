@@ -1,3 +1,5 @@
+import pandas as pd
+from sklearn.utils.validation import check_is_fitted
 from gtime.feature_extraction import MovingCustomFunction
 
 class SortedDensity(MovingCustomFunction):
@@ -43,3 +45,31 @@ class SortedDensity(MovingCustomFunction):
         SD = np.sum(np.multiply(t, signal))/np.sum(signal) # (eq. 2)
         SD = SD/(len(signal))
         return SD
+        
+    def transform(self, time_series: pd.DataFrame) -> pd.DataFrame:
+        """For every row of ``time_series``, compute the moving sorted density function of the
+         previous ``window_size`` elements.
+        Parameters
+        ----------
+        time_series : pd.DataFrame, shape (n_samples, 1), required
+            The DataFrame on which to compute the rolling moving custom function.
+        Returns
+        -------
+        time_series_t : pd.DataFrame, shape (n_samples, 1)
+            A DataFrame, with the same length as ``time_series``, containing the rolling
+            moving custom function for each element.
+        """
+        check_is_fitted(self)
+
+        if(self.is_causal):
+            time_series_mvg_sd = time_series.rolling(self.window_size).apply(
+                self.sorted_density, raw=self.raw
+            )
+        else:
+            time_series_mvg_sd = time_series.rolling(self.window_size, min_periods = int(self.window_size/2)).apply(
+                self.sorted_density, raw=self.raw
+            )
+            time_series_mvg_sd = time_series_mvg_sd.dropna()
+            
+        time_series_t = time_series_mvg_sd
+        return time_series_t

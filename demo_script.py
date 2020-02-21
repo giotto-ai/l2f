@@ -37,22 +37,41 @@ gaussian_sd = gaussian_sorted_density(ws_detrending)
 print('Sorted density for Gaussian signal: ', gaussian_sd)
 
 signal = data_simulation_sliding_lid['open'].to_numpy()
-t = np.array(range(len(signal)))/Fs
-signal = pd.DataFrame(remove_direct_sound(signal, Fs, signal_length)).to_numpy()
-
-#detrending_feature = CrestFactorDetrending(window_size=ws_detrending, is_causal = True)
-#detrended_signal = detrending_feature.fit_transform(signal)
-detrended_signal = generalized_detrending(signal, ws_detrending)                            # MovingCustomFeature #1
-
-density_feature = SortedDensity(window_size=ws_sorted_density, is_causal = True)
+detrending_feature = CrestFactorDetrending(window_size=ws_detrending, is_causal = False)
+detrended_signal = detrending_feature.fit_transform(pd.DataFrame(remove_direct_sound(signal, Fs, signal_length)))
+density_feature = SortedDensity(window_size=ws_sorted_density, is_causal = False)
 echo_density = density_feature.fit_transform(pd.DataFrame(detrended_signal)).to_numpy()
-print(echo_density.shape)
-print(echo_density[0:10])
-echo_density = sorted_density_feature(detrended_signal, ws_sorted_density)                  # MovingCustomFeature #2
-print(len(echo_density))
-print(echo_density[0:10])
-
 echo_density = echo_density/gaussian_sd
 echo_density = echo_density[~np.isnan(echo_density)]
 n, curve = curve_fitting_echo_density(echo_density, Fs)
-print('Esitmated parameter n: ', n)
+print('Estimated parameter n: ', n)
+
+signal = data_simulation_sliding_lid['almost_open'].to_numpy()
+detrending_feature = CrestFactorDetrending(window_size=ws_detrending, is_causal = False)
+detrended_signal = detrending_feature.fit_transform(pd.DataFrame(remove_direct_sound(signal, Fs, signal_length)))
+density_feature = SortedDensity(window_size=ws_sorted_density, is_causal = False)
+echo_density = density_feature.fit_transform(pd.DataFrame(detrended_signal)).to_numpy()
+echo_density = echo_density/gaussian_sd
+echo_density = echo_density[~np.isnan(echo_density)]
+n, curve = curve_fitting_echo_density(echo_density, Fs)
+print('Estimated parameter n: ', n)
+
+signal = data_simulation_sliding_lid['almost_closed'].to_numpy()
+detrending_feature = CrestFactorDetrending(window_size=ws_detrending, is_causal = False)
+detrended_signal = detrending_feature.fit_transform(pd.DataFrame(remove_direct_sound(signal, Fs, signal_length)))
+density_feature = SortedDensity(window_size=ws_sorted_density, is_causal = False)
+echo_density = density_feature.fit_transform(pd.DataFrame(detrended_signal)).to_numpy()
+echo_density = echo_density/gaussian_sd
+echo_density = echo_density[~np.isnan(echo_density)]
+n, curve = curve_fitting_echo_density(echo_density, Fs)
+print('Estimated parameter n: ', n)
+
+signal = data_simulation_sliding_lid['closed'].to_numpy()
+detrending_feature = CrestFactorDetrending(window_size=ws_detrending, is_causal = False)
+detrended_signal = detrending_feature.fit_transform(pd.DataFrame(remove_direct_sound(signal, Fs, signal_length)))
+density_feature = SortedDensity(window_size=ws_sorted_density, is_causal = False)
+echo_density = density_feature.fit_transform(pd.DataFrame(detrended_signal)).to_numpy()
+echo_density = echo_density/gaussian_sd
+echo_density = echo_density[~np.isnan(echo_density)]
+n, curve = curve_fitting_echo_density(echo_density, Fs)
+print('Estimated parameter n: ', n)
