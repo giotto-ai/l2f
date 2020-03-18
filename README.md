@@ -3,10 +3,10 @@
 # Analysis of acoustic signals with giotto-time
 
 ## What is it?
-This repository contains the code for the blog post 'Analysis of acoustic signals with giotto-time' [LINK HERE] where we use the Python time series library [giotto-time](https://github.com/giotto-ai/giotto-time) to predict the type of acoustic space based on generalized detrending and sorted density measure. 
+This repository contains the code for the blog post 'Analysis of acoustic signals with giotto-time' [LINK HERE] where we use the Python time series library [giotto-time](https://github.com/giotto-ai/giotto-time) to predict the type of acoustic space based on crest factor detrending and sorted density measure. 
 
 The 'deliver_tutorial.ipynb' showcases the applications of features of giotto-time to acoustic time series analysis:
-* uses **generalized detrending** based on [crest factor](https://en.wikipedia.org/wiki/Crest_factor) to remove the trend without an assumption on the trend type
+* uses **detrending based on [crest factor](https://en.wikipedia.org/wiki/Crest_factor)** to remove the trend without an assumption on the trend type
 * uses **sorted density** measure to characterize within what fraction of peaks is the information hidden
 
 ## Getting started
