@@ -15,7 +15,7 @@ def remove_direct_sound(signal, Fs, signal_length):
     """
     part_to_remove = 10/1000 # 10ms
     one_side_window = int(part_to_remove*Fs)
-    direct_index = np.argwhere(signal > max(signal)*0.25)[0,0]
+    direct_index = np.argwhere(signal.values > max(signal)*0.25)[0,0]
     signal_with_direct = signal[max((direct_index - one_side_window), 0):]
     clean_signal = signal_with_direct[2*one_side_window:]
     clean_signal = clean_signal[:int(min(Fs*signal_length, len(clean_signal)))]
